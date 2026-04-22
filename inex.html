@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>NexaCore Quantum Strategy Board – Ultra Suite</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-main: #020617;
+      --bg-card: rgba(15, 23, 42, 0.96);
+      --bg-soft: rgba(15, 23, 42, 0.85);
+      --border-soft: rgba(148, 163, 184, 0.4);
+      --accent: #0EA5E9;
+      --accent-soft: #38BDF8;
+      --accent-strong: #06B6D4;
+      --text-main: #E5E7EB;
+      --text-soft: #9CA3AF;
+      --danger: #F97316;
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --shadow-strong: 0 26px 70px rgba(0, 0, 0, 0.85);
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.6);
+      --transition-fast: 0.25s ease;
+      --transition-med: 0.4s ease;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* VIDEO DE FONDO */
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      overflow: hidden;
+    }
+
+    .bg-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.35) contrast(1.1) saturate(1.2);
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top, rgba(15,23,42,0.9) 0%, rgba(3,7,18,0.96) 40%, rgba(0,0,0,0.98) 100%);
+      z-index: -2;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(148,163,184,0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,0.12) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.18;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ANIMACIONES */
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 18px rgba(56,189,248,0.4); }
+      50% { box-shadow: 0 0 32px rgba(56,189,248,0.9); }
+      100% { box-shadow: 0 0 18px rgba(56,189,248,0.4); }
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(12px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+      0% { opacity: 0; transform: translateX(40px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      0% { opacity: 0; transform: translateX(-40px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulseDot {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    /* LAYOUT PRINCIPAL */
+    .app-shell {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      padding: 18px 18px 18px 18px;
+      gap: 14px;
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    @media (max-width: 1024px) {
+      .app-shell {
+        grid-template-columns: 70px minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 800px) {
+      body {
+        overflow: auto;
+      }
+      .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr);
+        grid-template-areas:
+          "header"
+          "sidebar"
+          "main";
+        height: auto;
+      }
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      animation: slideInLeft 0.7s ease-out forwards;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #0B1120 0%, #020617 100%);
+      box-shadow: 0 0 18px rgba(56,189,248,0.7);
+    }
+
+    .logo-circle svg {
+      width: 26px;
+      height: 26px;
+      filter: drop-shadow(0 0 10px rgba(56,189,248,0.8));
+    }
+
+    .sidebar-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-title-main {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-title-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-soft);
+    }
+
+    .sidebar-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-soft);
+      margin-top: 4px;
+      margin-bottom: 6px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item {
+      border-radius: 999px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .nav-item-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--accent-soft);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(14,165,233,0.18), rgba(56,189,248,0.08));
+      color: #E5E7EB;
+      transform: translateX(2px);
+    }
+
+    .nav-item:hover {
+      background: rgba(15,23,42,0.9);
+      color: #E5E7EB;
+    }
+
+    .nav-item-label-main {
+      font-weight: 500;
+    }
+
+    .nav-item-label-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .nav-item-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(30,64,175,0.6);
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22C55E;
+      margin-right: 6px;
+      animation: pulseDot 1.8s infinite;
+    }
+
+    .sidebar-footer-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    /* HEADER SUPERIOR */
+    .header-bar {
+      grid-area: header;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideInRight 0.7s ease-out forwards;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .header-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.9);
+      color: var(--text-soft);
+    }
+
+    .header-btn {
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #021018;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 14px rgba(56,189,248,0.7);
+      transition: filter var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .header-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    /* MAIN */
+    .main {
+      grid-area: main;
+      background: rgba(15,23,42,0.92);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-strong);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .main-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.98) 40%, rgba(15,23,42,1) 100%);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr);
+      gap: 10px;
+      padding: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-inner {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        height: auto;
+      }
+    }
+
+    /* PANEL PRINCIPAL (CAMBIO DE INTERFAZ) */
+    .panel-main {
+      border-radius: 18px;
+      background: var(--bg-soft);
+      border: 1px solid rgba(30,64,175,0.7);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .panel-main-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .panel-main-tabs {
+      display: flex;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .panel-tab {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(51,65,85,0.9);
+      background: rgba(15,23,42,0.9);
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast), border var(--transition-fast);
+    }
+
+    .panel-tab.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #021018;
+      border-color: transparent;
+    }
+
+    .panel-main-body {
+      position: relative;
+      flex: 1;
+      min-height: 260px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .view {
+      position: absolute;
+      inset: 0;
+      padding: 6px 2px 4px 2px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(20px);
+      transition: opacity var(--transition-med), transform var(--transition-med);
+      overflow-y: auto;
+    }
+
+    .view.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    /* VISTA: OVERVIEW */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      border-radius: var(--radius-md);
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .chip {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      color: var(--text-soft);
+    }
+
+    .chart-placeholder {
+      margin-top: 4px;
+      height: 120px;
+      border-radius: 10px;
+      background: radial-gradient(circle at top, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 40%, rgba(15,23,42,1) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-line {
+      position: absolute;
+      inset: 12px 10px 16px 10px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(15,23,42,1), rgba(15,23,42,1));
+    }
+
+    .chart-line::before,
+    .chart-line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(56,189,248,0.1), rgba(56,189,248,0.6), rgba(56,189,248,0.1));
+      opacity: 0.7;
+      clip-path: polygon(0% 70%, 10% 60%, 20% 65%, 30% 50%, 40% 55%, 50% 40%, 60% 45%, 70% 30%, 80% 35%, 90% 20%, 100% 25%);
+    }
+
+    .chart-line::after {
+      opacity: 0.3;
+      filter: blur(6px);
+    }
+
+    .chart-bars {
+      position: absolute;
+      inset: 12px 10px 16px 10px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(180deg, rgba(56,189,248,0.9), rgba(15,23,42,1));
+      opacity: 0.85;
+    }
+
+    .chart-bar:nth-child(1) { height: 30%; }
+    .chart-bar:nth-child(2) { height: 55%; }
+    .chart-bar:nth-child(3) { height: 40%; }
+    .chart-bar:nth-child(4) { height: 70%; }
+    .chart-bar:nth-child(5) { height: 50%; }
+    .chart-bar:nth-child(6) { height: 80%; }
+    .chart-bar:nth-child(7) { height: 60%; }
+
+    .kpi-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .kpi {
+      flex: 1;
+      min-width: 120px;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+
+    .kpi-label {
+      color: var(--text-soft);
+      margin-bottom: 2px;
+    }
+
+    .kpi-value {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .kpi-trend {
+      font-size: 10px;
+      color: #22C55E;
+    }
+
+    .kpi-trend.neg {
+      color: #F97316;
+    }
+
+    /* VISTA: ESCENARIOS */
+    .scenario-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .scenario-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scenario-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .scenario-item {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: background var(--transition-fast), border var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .scenario-item:hover {
+      background: rgba(15,23,42,1);
+      transform: translateY(-1px);
+    }
+
+    .scenario-item.active {
+      border-color: var(--accent);
+      background: radial-gradient(circle at top, rgba(14,165,233,0.18), rgba(15,23,42,1));
+    }
+
+    .scenario-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .scenario-meta {
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .scenario-impact {
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--accent-soft);
+    }
+
+    .scenario-detail {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 10px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .scenario-detail-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .scenario-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .scenario-pill {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      color: var(--text-soft);
+    }
+
+    /* VISTA: RIESGOS */
+    .risk-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .risk-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .risk-map {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 10px 12px;
+      font-size: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .risk-grid {
+      position: relative;
+      margin-top: 8px;
+      height: 160px;
+      border-radius: 10px;
+      background: radial-gradient(circle at top, rgba(15,23,42,1) 0%, rgba(15,23,42,1) 40%, rgba(15,23,42,1) 100%);
+      border: 1px solid rgba(51,65,85,0.9);
+      overflow: hidden;
+    }
+
+    .risk-grid::before,
+    .risk-grid::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(51,65,85,0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(51,65,85,0.5) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.4;
+    }
+
+    .risk-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #F97316;
+      box-shadow: 0 0 14px rgba(248,113,113,0.9);
+      cursor: pointer;
+      transition: transform var(--transition-fast);
+    }
+
+    .risk-dot:hover {
+      transform: scale(1.2);
+    }
+
+    .risk-dot.low {
+      background: #22C55E;
+      box-shadow: 0 0 10px rgba(34,197,94,0.9);
+    }
+
+    .risk-dot.med {
+      background: #EAB308;
+      box-shadow: 0 0 10px rgba(234,179,8,0.9);
+    }
+
+    .risk-list {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 10px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .risk-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(30,64,175,0.5);
+    }
+
+    .risk-row:last-child {
+      border-bottom: none;
+    }
+
+    .risk-name {
+      font-size: 12px;
+    }
+
+    .risk-level {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+    }
+
+    .risk-level.high {
+      border-color: #F97316;
+      color: #F97316;
+    }
+
+    .risk-level.medium {
+      border-color: #EAB308;
+      color: #EAB308;
+    }
+
+    .risk-level.low {
+      border-color: #22C55E;
+      color: #22C55E;
+    }
+
+    /* VISTA: ACADEMY (VIDEOS) */
+    .academy-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .academy-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .video-main {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 10px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .video-frame {
+      margin-top: 4px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(30,64,175,0.8);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+      aspect-ratio: 16 / 9;
+      background: #000;
+    }
+
+    .video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .video-list {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 10px 12px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .video-item {
+      border-radius: 10px;
+      padding: 6px 8px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(51,65,85,0.9);
+      cursor: pointer;
+      transition: background var(--transition-fast), border var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .video-item:hover {
+      background: rgba(15,23,42,1);
+      transform: translateY(-1px);
+    }
+
+    .video-item.active {
+      border-color: var(--accent);
+      background: radial-gradient(circle at top, rgba(14,165,233,0.18), rgba(15,23,42,1));
+    }
+
+    .video-item-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .video-item-meta {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    /* PANEL LATERAL DERECHO */
+    .panel-side {
+      border-radius: 18px;
+      background: var(--bg-soft);
+      border: 1px solid rgba(30,64,175,0.7);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .panel-side-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .timeline {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 8px 10px;
+      font-size: 11px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      margin-top: 3px;
+    }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .timeline-meta {
+      color: var(--text-soft);
+    }
+
+    .actions-list {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(30,64,175,0.5);
+    }
+
+    .action-row:last-child {
+      border-bottom: none;
+    }
+
+    .action-name {
+      font-size: 11px;
+    }
+
+    .action-btn {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #021018;
+      cursor: pointer;
+    }
+
+    .mini-form {
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.9);
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mini-form label {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .mini-form input,
+    .mini-form select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(51,65,85,0.9);
+      background: rgba(15,23,42,0.9);
+      color: var(--text-main);
+      font-size: 11px;
+      font-family: inherit;
+    }
+
+    .mini-form button {
+      margin-top: 4px;
+      align-self: flex-start;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #021018;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* MODAL INTERFAZ EXPLICATIVA */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-med);
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      max-width: 900px;
+      width: 95%;
+      border-radius: 20px;
+      background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(56,189,248,0.6);
+      box-shadow: 0 26px 70px rgba(0,0,0,0.9);
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 14px;
+      animation: floatUp 0.4s ease-out forwards;
+    }
+
+    @media (max-width: 900px) {
+      .modal {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .modal-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      border-radius: 999px;
+      width: 26px;
+      height: 26px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.9);
+      color: var(--text-soft);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .modal-body {
+      font-size: 13px;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-body ul {
+      padding-left: 16px;
+    }
+
+    .modal-body li {
+      margin-bottom: 4px;
+    }
+
+    .modal-video {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(30,64,175,0.8);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+      background: #000;
+      aspect-ratio: 16 / 9;
+    }
+
+    .modal-video iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .modal-footer {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- VIDEO DE FONDO (CAMBIA src POR TU VÍDEO) -->
+  <div class="bg-video">
+    <video autoplay muted loop playsinline>
+      <source src="tu-video-fondo.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="bg-overlay"></div>
+  <div class="bg-grid"></div>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-circle">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="20" width="90" height="80" rx="16" fill="#020617" stroke="#0EA5E9" stroke-width="3" />
+            <path d="M35 85 L35 35 L48 35 L72 65 L72 35 L85 35 L85 85 L72 85 L48 55 L48 85 Z"
+                  fill="#38BDF8" />
+          </svg>
+        </div>
+        <div class="sidebar-title">
+          <div class="sidebar-title-main">NexaCore</div>
+          <div class="sidebar-title-sub">Quantum Suite</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sidebar-section-label">Panel principal</div>
+        <ul class="nav-list">
+          <li class="nav-item active" data-section="overview">
+            <div class="nav-item-icon">◎</div>
+            <div class="nav-item-text">
+              <span class="nav-item-label-main">Visión general</span>
+              <span class="nav-item-label-sub">Pulso completo del negocio</span>
+            </div>
+          </li>
+          <li class="nav-item" data-section="scenarios">
+            <div class="nav-item-icon">⚙</div>
+            <div class="nav-item-text">
+              <span class="nav-item-label-main">Escenarios IA</span>
+              <span class="nav-item-label-sub">Simulación de decisiones</span>
+            </div>
+          </li>
+          <li class="nav-item" data-section="risks">
+            <div class="nav-item-icon">⚠</div>
+            <div class="nav-item-text">
+              <span class="nav-item-label-main">Radar de riesgos</span>
+              <span class="nav-item-label-sub">Mapa de exposición</span>
+            </div>
+          </li>
+          <li class="nav-item" data-section="academy">
+            <div class="nav-item-icon">▶</div>
+            <div class="nav-item-text">
+              <span class="nav-item-label-main">Academy</span>
+              <span class="nav-item-label-sub">Vídeos y guías</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="sidebar-section-label">Acciones rápidas</div>
+        <ul class="nav-list">
+          <li class="nav-item" id="btn-open-modal">
+            <div class="nav-item-icon">❓</div>
+            <div class="nav-item-text">
+              <span class="nav-item-label-main">¿Cómo funciona?</span>
+              <span class="nav-item-label-sub">Explicación guiada</span>
+            </div>
+          </li>
+          <li class="nav-item" data-section="academy">
+            <div class="nav-item-icon">🎓</div>
+            <div class="nav-item-text">
+              <span class="nav-item-label-main">Ver demo en vídeo</span>
+              <span class="nav-item-label-sub">Quantum Board en acción</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-row">
+          <div class="status-dot"></div>
+          <span>Programa activo · 50.000€ / mes</span>
+        </div>
+        <div class="sidebar-footer-row">
+          <span>Clientes máximos: 12 · Acceso ultra limitado</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- HEADER SUPERIOR -->
+    <header class="header-bar">
+      <div class="header-left">
+        <div class="header-title" id="header-title">Visión general ejecutiva</div>
+        <div class="header-subtitle" id="header-subtitle">
+          Panel central con caja, márgenes, riesgos y oportunidades en tiempo real.
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="pill">Modo: Dirección · CEO / Propietario</div>
+        <button class="header-btn" id="btn-open-modal-top">Ver explicación</button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="main-inner">
+
+        <!-- PANEL PRINCIPAL -->
+        <section class="panel-main">
+          <div class="panel-main-header">
+            <div class="panel-main-title">Quantum Strategy Board</div>
+            <div class="panel-main-tabs">
+              <button class="panel-tab active" data-view="overview">Overview</button>
+              <button class="panel-tab" data-view="scenarios">Escenarios</button>
+              <button class="panel-tab" data-view="risks">Riesgos</button>
+              <button class="panel-tab" data-view="academy">Academy</button>
+            </div>
+          </div>
+
+          <div class="panel-main-body">
+            <!-- VIEW OVERVIEW -->
+            <div class="view active" id="view-overview">
+              <div class="overview-grid">
+                <div class="card">
+                  <div class="card-header">
+                    <div>
+                      <div class="card-title">Resumen ejecutivo</div>
+                      <div class="card-sub">Caja, margen, crecimiento y riesgo global</div>
+                    </div>
+                    <div class="chip">Actualizado en tiempo real</div>
+                  </div>
+                  <div class="chart-placeholder">
+                    <div class="chart-line"></div>
+                  </div>
+                  <div class="kpi-row">
+                    <div class="kpi">
+                      <div class="kpi-label">Caja disponible</div>
+                      <div class="kpi-value">18,4M€</div>
+                      <div class="kpi-trend">+2,3M€ vs. mes anterior</div>
+                    </div>
+                    <div class="kpi">
+                      <div class="kpi-label">Margen operativo</div>
+                      <div class="kpi-value">27,8%</div>
+                      <div class="kpi-trend">+3,1 pts · tendencia positiva</div>
+                    </div>
+                    <div class="kpi">
+                      <div class="kpi-label">Riesgo agregado</div>
+                      <div class="kpi-value">Moderado</div>
+                      <div class="kpi-trend neg">3 focos críticos identificados</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <div>
+                      <div class="card-title">Carga de trabajo y saturación</div>
+                      <div class="card-sub">Equipos, proyectos y clientes clave</div>
+                    </div>
+                    <div class="chip">Vista operativa</div>
+                  </div>
+                  <div class="chart-placeholder">
+                    <div class="chart-bars">
+                      <div class="chart-bar"></div>
+                      <div class="chart-bar"></div>
+                      <div class="chart-bar"></div>
+                      <div class="chart-bar"></div>
+                      <div class="chart-bar"></div>
+                      <div class="chart-bar"></div>
+                      <div class="chart-bar"></div>
+                    </div>
+                  </div>
+                  <div class="kpi-row">
+                    <div class="kpi">
+                      <div class="kpi-label">Equipos saturados</div>
+                      <div class="kpi-value">2 / 7</div>
+                      <div class="kpi-trend neg">Requiere redistribución</div>
+                    </div>
+                    <div class="kpi">
+                      <div class="kpi-label">Clientes en riesgo</div>
+                      <div class="kpi-value">4</div>
+                      <div class="kpi-trend neg">Alertas activas</div>
+                    </div>
+                    <div class="kpi">
+                      <div class="kpi-label">Proyectos clave</div>
+                      <div class="kpi-value">11</div>
+                      <div class="kpi-trend">7 en verde · 4 en ámbar</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW ESCENARIOS -->
+            <div class="view" id="view-scenarios">
+              <div class="scenario-layout">
+                <div class="scenario-list">
+                  <div class="scenario-item active" data-scenario="precios">
+                    <div class="scenario-title">Subida de precios +7% en línea principal</div>
+                    <div class="scenario-meta">
+                      <span>Impacto margen: +4,2 pts</span>
+                      <span>Riesgo fuga clientes: medio</span>
+                    </div>
+                    <div class="scenario-impact">Recomendación IA: aplicar en 3 fases, segmentando por cliente.</div>
+                  </div>
+                  <div class="scenario-item" data-scenario="expansion">
+                    <div class="scenario-title">Entrada en nuevo país (DACH)</div>
+                    <div class="scenario-meta">
+                      <span>Inversión inicial: 2,8M€</span>
+                      <span>Payback estimado: 24 meses</span>
+                    </div>
+                    <div class="scenario-impact">Recomendación IA: viable si se refuerza equipo comercial senior.</div>
+                  </div>
+                  <div class="scenario-item" data-scenario="recorte">
+                    <div class="scenario-title">Cierre de línea poco rentable</div>
+                    <div class="scenario-meta">
+                      <span>Mejora margen: +2,1 pts</span>
+                      <span>Impacto marca: bajo</span>
+                    </div>
+                    <div class="scenario-impact">Recomendación IA: ejecutar en 6 meses con plan de transición.</div>
+                  </div>
+                  <div class="scenario-item" data-scenario="fusion">
+                    <div class="scenario-title">Adquisición de competidor regional</div>
+                    <div class="scenario-meta">
+                      <span>Sinergias: +5,4M€/año</span>
+                      <span>Riesgo integración: alto</span>
+                    </div>
+                    <div class="scenario-impact">Recomendación IA: solo con equipo de integración dedicado.</div>
+                  </div>
+                </div>
+
+                <div class="scenario-detail" id="scenario-detail">
+                  <div class="scenario-detail-title" id="scenario-detail-title">
+                    Subida de precios +7% en línea principal
+                  </div>
+                  <div id="scenario-detail-text">
+                    Este escenario simula una subida gradual de precios en la línea principal de negocio,
+                    segmentando por tipo de cliente y sensibilidad histórica al precio.
+                  </div>
+                  <div class="scenario-detail-grid">
+                    <div class="scenario-pill">Impacto EBITDA: +3,1M€ / año</div>
+                    <div class="scenario-pill">Probabilidad de éxito: 82%</div>
+                    <div class="scenario-pill">Clientes sensibles: 14%</div>
+                    <div class="scenario-pill">Requiere comunicación proactiva</div>
+                  </div>
+                  <div style="margin-top:6px;font-size:11px;color:var(--text-soft);">
+                    Pulsa en otros escenarios de la izquierda para ver cómo cambiaría el futuro de la empresa.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW RIESGOS -->
+            <div class="view" id="view-risks">
+              <div class="risk-layout">
+                <div class="risk-map">
+                  <div class="card-header" style="margin-bottom:4px;">
+                    <div>
+                      <div class="card-title">Mapa de riesgos</div>
+                      <div class="card-sub">Probabilidad vs. impacto</div>
+                    </div>
+                    <div class="chip">Radar IA</div>
+                  </div>
+                  <div class="risk-grid">
+                    <div class="risk-dot high" style="top:18%; left:72%;" title="Cliente clave en riesgo"></div>
+                    <div class="risk-dot med" style="top:40%; left:40%;" title="Dependencia de proveedor"></div>
+                    <div class="risk-dot low" style="top:70%; left:20%;" title="Riesgo operativo menor"></div>
+                    <div class="risk-dot high" style="top:30%; left:15%;" title="Riesgo de talento clave"></div>
+                    <div class="risk-dot med" style="top:60%; left:65%;" title="Riesgo de ciberseguridad"></div>
+                  </div>
+                </div>
+
+                <div class="risk-list">
+                  <div class="panel-side-section-title">Lista priorizada de riesgos</div>
+                  <div class="risk-row">
+                    <div class="risk-name">Pérdida de cliente TOP 3</div>
+                    <div class="risk-level high">Alto</div>
+                  </div>
+                  <div class="risk-row">
+                    <div class="risk-name">Dependencia de proveedor único</div>
+                    <div class="risk-level medium">Medio</div>
+                  </div>
+                  <div class="risk-row">
+                    <div class="risk-name">Rotación de talento clave</div>
+                    <div class="risk-level high">Alto</div>
+                  </div>
+                  <div class="risk-row">
+                    <div class="risk-name">Ciberataque a sistemas críticos</div>
+                    <div class="risk-level medium">Medio</div>
+                  </div>
+                  <div class="risk-row">
+                    <div class="risk-name">Riesgo reputacional en redes</div>
+                    <div class="risk-level low">Bajo</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW ACADEMY -->
+            <div class="view" id="view-academy">
+              <div class="academy-layout">
+                <div class="video-main">
+                  <div class="card-header" style="margin-bottom:4px;">
+                    <div>
+                      <div class="card-title" id="video-main-title">Introducción a Quantum Strategy Board</div>
+                      <div class="card-sub" id="video-main-sub">Visión general para dirección y propietarios</div>
+                    </div>
+                    <div class="chip">Demo guiada</div>
+                  </div>
+                  <div class="video-frame">
+                    <!-- Cambia el src por tus vídeos reales -->
+                    <iframe id="video-main-iframe"
+                            src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                            title="Demo Quantum Strategy Board"
+                            allowfullscreen></iframe>
+                  </div>
+                </div>
+
+                <div class="video-list">
+                  <div class="panel-side-section-title">Vídeos disponibles</div>
+                  <div class="video-item active"
+                       data-video-title="Introducción a Quantum Strategy Board"
+                       data-video-sub="Visión general para dirección y propietarios"
+                       data-video-src="https://www.youtube.com/embed/dQw4w9WgXcQ">
+                    <div class="video-item-title">01 · Visión general</div>
+                    <div class="video-item-meta">Duración: 6:32 · Nivel: básico</div>
+                  </div>
+                  <div class="video-item"
+                       data-video-title="Trabajar con escenarios de IA"
+                       data-video-sub="Cómo simular decisiones estratégicas"
+                       data-video-src="https://www.youtube.com/embed/oHg5SJYRHA0">
+                    <div class="video-item-title">02 · Escenarios IA</div>
+                    <div class="video-item-meta">Duración: 9:10 · Nivel: intermedio</div>
+                  </div>
+                  <div class="video-item"
+                       data-video-title="Radar de riesgos y alertas ejecutivas"
+                       data-video-sub="Cómo priorizar dónde actuar primero"
+                       data-video-src="https://www.youtube.com/embed/3GwjfUFyY6M">
+                    <div class="video-item-title">03 · Riesgos y alertas</div>
+                    <div class="video-item-meta">Duración: 7:45 · Nivel: intermedio</div>
+                  </div>
+                  <div class="video-item"
+                       data-video-title="Sesiones estratégicas con datos en tiempo real"
+                       data-video-sub="Cómo usar el panel en reuniones de dirección"
+                       data-video-src="https://www.youtube.com/embed/ub82Xb1C8os">
+                    <div class="video-item-title">04 · Reuniones de dirección</div>
+                    <div class="video-item-meta">Duración: 8:20 · Nivel: avanzado</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- PANEL LATERAL DERECHO -->
+        <aside class="panel-side">
+          <div>
+            <div class="panel-side-section-title">Línea temporal de decisiones</div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Revisión de precios aprobada</div>
+                  <div class="timeline-meta">Hace 2 días · Impacto estimado: +3,1M€ / año</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Alerta de cliente en riesgo</div>
+                  <div class="timeline-meta">Hace 5 días · Acción recomendada: visita presencial</div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="timeline-title">Escenario de expansión DACH analizado</div>
+                  <div class="timeline-meta">Hace 1 semana · Estado: en evaluación</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel-side-section-title">Acciones recomendadas por IA</div>
+            <div class="actions-list">
+              <div class="action-row">
+                <div class="action-name">Contactar cliente TOP en riesgo</div>
+                <button class="action-btn">Ver detalle</button>
+              </div>
+              <div class="action-row">
+                <div class="action-name">Revisar dependencia de proveedor único</div>
+                <button class="action-btn">Ver plan</button>
+              </div>
+              <div class="action-row">
+                <div class="action-name">Reunión estratégica mensual</div>
+                <button class="action-btn">Agendar</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel-side-section-title">Solicitud de acceso al programa</div>
+            <div class="mini-form">
+              <label for="mini-empresa">Empresa</label>
+              <input type="text" id="mini-empresa" placeholder="Nombre de la empresa">
+
+              <label for="mini-facturacion">Facturación anual</label>
+              <select id="mini-facturacion">
+                <option value="">Selecciona</option>
+                <option>1M€ – 5M€</option>
+                <option>5M€ – 20M€</option>
+                <option>20M€ – 100M€</option>
+                <option>Más de 100M€</option>
+              </select>
+
+              <button id="mini-submit">Enviar interés</button>
+              <div class="form-note" style="font-size:10px;">
+                Este formulario es una versión rápida. El proceso completo se realiza en la interfaz de solicitud detallada.
+              </div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL EXPLICATIVO -->
+  <div class="modal-backdrop" id="modal-help">
+    <div class="modal">
+      <div>
+        <div class="modal-header">
+          <div class="modal-title">Cómo funciona Quantum Strategy Board</div>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Quantum Strategy Board está diseñado para que dirección y propietarios tomen decisiones
+            con datos reales, simulaciones de IA y una visión 360º del negocio.
+          </p>
+          <ul>
+            <li><strong>Visión general:</strong> caja, márgenes, carga de trabajo y clientes en riesgo.</li>
+            <li><strong>Escenarios IA:</strong> simula subidas de precios, expansiones, recortes o adquisiciones.</li>
+            <li><strong>Radar de riesgos:</strong> identifica dónde puede romperse la empresa antes de que ocurra.</li>
+            <li><strong>Academy:</strong> vídeos cortos para entender cómo usar cada parte del panel.</li>
+          </ul>
+          <p>
+            El programa tiene un coste de <strong>50.000€ / mes</strong> y está limitado a un número
+            muy reducido de empresas para garantizar dedicación máxima.
+          </p>
+        </div>
+        <div class="modal-footer">
+          Usa el menú de la izquierda para cambiar de interfaz y ver cada módulo en detalle.
+        </div>
+      </div>
+      <div class="modal-video">
+        <!-- Cambia por un vídeo tuyo explicando el producto -->
+        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="Explicación Quantum Strategy Board"
+                allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navegación lateral (cambia sección principal + header)
+    const navItems = document.querySelectorAll('.nav-item[data-section]');
+    const headerTitle = document.getElementById('header-title');
+    const headerSubtitle = document.getElementById('header-subtitle');
+
+    const sectionTexts = {
+      overview: {
+        title: 'Visión general ejecutiva',
+        subtitle: 'Panel central con caja, márgenes, riesgos y oportunidades en tiempo real.'
+      },
+      scenarios: {
+        title: 'Escenarios estratégicos con IA',
+        subtitle: 'Simula decisiones clave y ve el impacto estimado antes de ejecutarlas.'
+      },
+      risks: {
+        title: 'Radar de riesgos y exposición',
+        subtitle: 'Mapa de riesgos críticos para anticipar problemas antes de que exploten.'
+      },
+      academy: {
+        title: 'Academy · Formación y demos',
+        subtitle: 'Vídeos cortos para entender y dominar Quantum Strategy Board.'
+      }
+    };
+
+    function setSection(section) {
+      navItems.forEach(item => {
+        item.classList.toggle('active', item.dataset.section === section);
+      });
+
+      const tabButtons = document.querySelectorAll('.panel-tab');
+      tabButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === section);
+      });
+
+      const views = document.querySelectorAll('.view');
+      views.forEach(view => view.classList.remove('active'));
+
+      const targetView = document.getElementById('view-' + section);
+      if (targetView) targetView.classList.add('active');
+
+      if (sectionTexts[section]) {
+        headerTitle.textContent = sectionTexts[section].title;
+        headerSubtitle.textContent = sectionTexts[section].subtitle;
+      }
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const section = item.dataset.section;
+        if (section) setSection(section);
+      });
+    });
+
+    // Tabs dentro del panel principal
+    const panelTabs = document.querySelectorAll('.panel-tab');
+    panelTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const view = tab.dataset.view;
+        setSection(view);
+      });
+    });
+
+    // Escenarios: cambiar detalle al pulsar
+    const scenarioItems = document.querySelectorAll('.scenario-item');
+    const scenarioDetailTitle = document.getElementById('scenario-detail-title');
+    const scenarioDetailText = document.getElementById('scenario-detail-text');
+
+    const scenarioDetails = {
+      precios: {
+        title: 'Subida de precios +7% en línea principal',
+        text: 'La IA analiza la sensibilidad al precio por segmento, histórico de churn y elasticidad. ' +
+              'Recomienda una subida gradual en 3 fases, empezando por clientes con mayor valor y menor sensibilidad.'
+      },
+      expansion: {
+        title: 'Entrada en nuevo país (DACH)',
+        text: 'Se simulan distintos escenarios de entrada (partners, filial propia, adquisiciones) y se calcula ' +
+              'el impacto en caja, margen y riesgo operativo. La IA recomienda una entrada progresiva con socios locales.'
+      },
+      recorte: {
+        title: 'Cierre de línea poco rentable',
+        text: 'Se evalúa el impacto en margen, estructura de costes y percepción de marca. ' +
+              'La IA propone un plan de transición de 6 meses con migración de clientes a líneas más rentables.'
+      },
+      fusion: {
+        title: 'Adquisición de competidor regional',
+        text: 'Se analizan sinergias, solapamientos de cartera, riesgos culturales y de integración. ' +
+              'La IA solo recomienda la operación si se crea un equipo de integración dedicado y se protege la caja.'
+      }
+    };
+
+    scenarioItems.forEach(item => {
+      item.addEventListener('click', () => {
+        scenarioItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        const key = item.dataset.scenario;
+        if (scenarioDetails[key]) {
+          scenarioDetailTitle.textContent = scenarioDetails[key].title;
+          scenarioDetailText.textContent = scenarioDetails[key].text;
+        }
+      });
+    });
+
+    // Academy: cambiar vídeo al pulsar
+    const videoItems = document.querySelectorAll('.video-item');
+    const videoMainTitle = document.getElementById('video-main-title');
+    const videoMainSub = document.getElementById('video-main-sub');
+    const videoMainIframe = document.getElementById('video-main-iframe');
+
+    videoItems.forEach(item => {
+      item.addEventListener('click', () => {
+        videoItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        const title = item.dataset.videoTitle;
+        const sub = item.dataset.videoSub;
+        const src = item.dataset.videoSrc;
+        videoMainTitle.textContent = title;
+        videoMainSub.textContent = sub;
+        videoMainIframe.src = src;
+      });
+    });
+
+    // Modal de ayuda
+    const modal = document.getElementById('modal-help');
+    const btnOpenModal = document.getElementById('btn-open-modal');
+    const btnOpenModalTop = document.getElementById('btn-open-modal-top');
+    const btnCloseModal = document.getElementById('modal-close');
+
+    function openModal() {
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+    }
+
+    btnOpenModal.addEventListener('click', openModal);
+    btnOpenModalTop.addEventListener('click', openModal);
+    btnCloseModal.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Mini formulario (simulación)
+    const miniSubmit = document.getElementById('mini-submit');
+    miniSubmit.addEventListener('click', () => {
+      alert('Solicitud registrada. Nos pondremos en contacto para evaluar el encaje en el programa Quantum Strategy Board.');
+    });
+  </script>
+</body>
+</html>

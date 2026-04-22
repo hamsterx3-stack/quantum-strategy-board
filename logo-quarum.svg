@@ -1,0 +1,35 @@
+<svg width="260" height="80" viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00C2FF"/>
+      <stop offset="100%" stop-color="#007BFF"/>
+    </linearGradient>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Marco redondeado estilo neón -->
+  <rect x="10" y="10" width="60" height="60" rx="14" fill="none" stroke="url(#qGrad)" stroke-width="3" filter="url(#glow)"/>
+
+  <!-- Símbolo Q minimalista -->
+  <path d="M40 25
+           A15 15 0 1 1 39.9 25
+           M48 48 L56 56"
+        stroke="url(#qGrad)" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+
+  <!-- Texto QUARUM -->
+  <text x="90" y="45" font-family="Segoe UI, sans-serif" font-size="32" fill="white" font-weight="600">
+    Quarum
+  </text>
+
+  <!-- Subtítulo -->
+  <text x="90" y="62" font-family="Segoe UI, sans-serif" font-size="14" fill="#00C2FF">
+    Plataforma tecnológica
+  </text>
+</svg>
